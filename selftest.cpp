@@ -1,3 +1,4 @@
+//GL LIBRARIES
 #include <GL/glew.h>
 #include <GLFW/glfw3.h>
 
@@ -6,16 +7,20 @@
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
 
+//STANDARD LIBRARIES
 #include <iostream>
 #include <string>
 #include <vector>
 #include <fstream>
 #include <math.h>
 
+//PERSONAL LIBRARIES
+#include "pngloader.h"
+
 using namespace std;
 
-const int WIDTH = 1280;
-const int HEIGHT = 720;
+const int WIDTH = 1000;
+const int HEIGHT = 1000;
 
 //HELPER FUCNTIONS FROM EXAMPLES
 // helper to check and display for shader compiler errors
@@ -89,52 +94,56 @@ void makeCubeVBO(GLuint& vao, GLuint& vbo, GLuint& ibo)
 
 	GLfloat cubeData[] =
 	{
-	//  X     Y     Z           U     V
+	//  VERTEX COORDS          TEX COORDS         NORMAL VECTOR
+	//  X     Y     Z           U     V           X     Y     Z
 	//face 0:
-	   1.0f, 1.0f, 1.0f,       1.0f, 1.0f, // vertex 0
-	  -1.0f, 1.0f, 1.0f,       0.0f, 1.0f, // vertex 1
-	   1.0f,-1.0f, 1.0f,       1.0f, 0.0f, // vertex 2
-	  -1.0f,-1.0f, 1.0f,       0.0f, 0.0f, // vertex 3
+	   1.0f, 1.0f, 1.0f,       1.0f, 1.0f,       0.0f, 0.0f, 1.0f, // vertex 0
+	  -1.0f, 1.0f, 1.0f,       0.0f, 1.0f,       0.0f, 0.0f, 1.0f, // vertex 1
+	   1.0f,-1.0f, 1.0f,       1.0f, 0.0f,       0.0f, 0.0f, 1.0f, // vertex 2
+	  -1.0f,-1.0f, 1.0f,       0.0f, 0.0f,       0.0f, 0.0f, 1.0f, // vertex 3
 
 	// face 1:
-	   1.0f, 1.0f, 1.0f,       1.0f, 1.0f, // vertex 0
-	   1.0f,-1.0f, 1.0f,       0.0f, 1.0f, // vertex 1
-	   1.0f, 1.0f,-1.0f,       1.0f, 0.0f, // vertex 2
-	   1.0f,-1.0f,-1.0f,       0.0f, 0.0f, // vertex 3
+	   1.0f, 1.0f, 1.0f,       1.0f, 1.0f,       1.0f, 0.0f, 0.0f, // vertex 0
+	   1.0f,-1.0f, 1.0f,       0.0f, 1.0f,       1.0f, 0.0f, 0.0f, // vertex 1
+	   1.0f, 1.0f,-1.0f,       1.0f, 0.0f,       1.0f, 0.0f, 0.0f, // vertex 2
+	   1.0f,-1.0f,-1.0f,       0.0f, 0.0f,       1.0f, 0.0f, 0.0f, // vertex 3
 
 	// face 2:
-	   1.0f, 1.0f, 1.0f,       1.0f, 1.0f, // vertex 0
-	   1.0f, 1.0f,-1.0f,       0.0f, 1.0f, // vertex 1
-	  -1.0f, 1.0f, 1.0f,       1.0f, 0.0f, // vertex 2
-	  -1.0f, 1.0f,-1.0f,       0.0f, 0.0f, // vertex 3
+	   1.0f, 1.0f, 1.0f,       1.0f, 1.0f,       0.0f, 1.0f, 0.0f, // vertex 0
+	   1.0f, 1.0f,-1.0f,       0.0f, 1.0f,       0.0f, 1.0f, 0.0f, // vertex 1
+	  -1.0f, 1.0f, 1.0f,       1.0f, 0.0f,       0.0f, 1.0f, 0.0f, // vertex 2
+	  -1.0f, 1.0f,-1.0f,       0.0f, 0.0f,       0.0f, 1.0f, 0.0f, // vertex 3
 
 	// face 3:
-	   1.0f, 1.0f,-1.0f,       1.0f, 1.0f, // vertex 0
-	   1.0f,-1.0f,-1.0f,       0.0f, 1.0f, // vertex 1
-	  -1.0f, 1.0f,-1.0f,       1.0f, 0.0f, // vertex 2
-	  -1.0f,-1.0f,-1.0f,       0.0f, 0.0f, // vertex 3
+	   1.0f, 1.0f,-1.0f,       1.0f, 1.0f,       0.0f, 0.0f,-1.0f, // vertex 0
+	   1.0f,-1.0f,-1.0f,       0.0f, 1.0f,       0.0f, 0.0f,-1.0f, // vertex 1
+	  -1.0f, 1.0f,-1.0f,       1.0f, 0.0f,       0.0f, 0.0f,-1.0f, // vertex 2
+	  -1.0f,-1.0f,-1.0f,       0.0f, 0.0f,       0.0f, 0.0f,-1.0f, // vertex 3
 
 	// face 4:
-	  -1.0f, 1.0f, 1.0f,       1.0f, 1.0f, // vertex 0
-	  -1.0f, 1.0f,-1.0f,       0.0f, 1.0f, // vertex 1
-	  -1.0f,-1.0f, 1.0f,       1.0f, 0.0f, // vertex 2
-	  -1.0f,-1.0f,-1.0f,       0.0f, 0.0f, // vertex 3
+	  -1.0f, 1.0f, 1.0f,       1.0f, 1.0f,      -1.0f, 0.0f, 0.0f, // vertex 0
+	  -1.0f, 1.0f,-1.0f,       0.0f, 1.0f,      -1.0f, 0.0f, 0.0f, // vertex 1
+	  -1.0f,-1.0f, 1.0f,       1.0f, 0.0f,      -1.0f, 0.0f, 0.0f, // vertex 2
+	  -1.0f,-1.0f,-1.0f,       0.0f, 0.0f,      -1.0f, 0.0f, 0.0f, // vertex 3
 
 	// face 5:
-	   1.0f,-1.0f, 1.0f,       1.0f, 1.0f, // vertex 0
-	  -1.0f,-1.0f, 1.0f,       0.0f, 1.0f, // vertex 1
-	   1.0f,-1.0f,-1.0f,       1.0f, 0.0f, // vertex 2
-	  -1.0f,-1.0f,-1.0f,       0.0f, 0.0f, // vertex 3
-	}; // 6 faces with 4 vertices with 5 components (floats)
+	   1.0f,-1.0f, 1.0f,       1.0f, 1.0f,       0.0f,-1.0f, 0.0f, // vertex 0
+	  -1.0f,-1.0f, 1.0f,       0.0f, 1.0f,       0.0f,-1.0f, 0.0f, // vertex 1
+	   1.0f,-1.0f,-1.0f,       1.0f, 0.0f,       0.0f,-1.0f, 0.0f, // vertex 2
+	  -1.0f,-1.0f,-1.0f,       0.0f, 0.0f,       0.0f,-1.0f, 0.0f  // vertex 3
+	}; // 6 faces with 4 vertices with 8 components (floats)
 
-	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 6 * 5, cubeData, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * 6 * 4 * 8, cubeData, GL_STATIC_DRAW);
 
 	//set up positions of attributes inside of the array
 	glEnableVertexAttribArray(0);
-	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 5, (char*)0 + 0*sizeof(GLfloat));
+	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 8.0f, (char*)0 + 0*sizeof(GLfloat));
 
 	glEnableVertexAttribArray(1);
-	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 5, (char*)0 + 3*sizeof(GLfloat));
+	glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, sizeof(GLfloat) * 8.0f, (char*)0 + 3*sizeof(GLfloat));
+
+	glEnableVertexAttribArray(2);
+	glVertexAttribPointer(2, 3, GL_FLOAT, GL_TRUE, sizeof(GLfloat) * 8.0f, (char*)0 + 5*sizeof(GLfloat));
 
 	//make index buffer
 	glGenBuffers(1, &ibo);
@@ -222,6 +231,28 @@ void loadShadersFromFile(GLuint& fullShader, GLuint& vertShader, GLuint& fragSha
 	check_program_link_status(fullShader);
 }
 
+//binds chessboard texture to GL context
+void textureLoader()
+{
+	//setup handle
+	GLuint chess;
+	glGenTextures(1, &chess);
+	glActiveTexture(GL_TEXTURE0);
+	glBindTexture(GL_TEXTURE_2D, chess);
+
+	//set parameters
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+	//get data
+	unsigned char* imageData = makeCheckerboard(8);
+
+	//apply to texture
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 8, 8, 0, GL_RGBA, GL_UNSIGNED_BYTE, imageData);
+}
+
 int main()
 {
 	//make OS window for rendering
@@ -242,10 +273,20 @@ int main()
 	GLuint shader, vertex, fragment;
 	loadShadersFromFile(shader, vertex, fragment);
 	GLint projectionLocation = glGetUniformLocation(shader, "transformMatrix");
+	GLint lightDirectionLocation = glGetUniformLocation(shader, "lightDir");
+	GLint texLocation = glGetUniformLocation(shader, "tex");
+	glUseProgram(shader);
 
 	//make buffers
 	GLuint vertexArray, vertexBuffer, indexBuffer;
 	makeCubeVBO(vertexArray, vertexBuffer, indexBuffer);
+
+	//load textures
+	textureLoader();
+
+	//set static uniforms
+	glUniform3f(lightDirectionLocation, -5.0f, -3.0f, -5.0f);
+	glUniform1i(texLocation, 0);
 
 	//begin render loop
 	glEnable(GL_DEPTH_TEST);
@@ -260,8 +301,6 @@ int main()
 		//clear framebuffer
 		glClear(GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
-		glUseProgram(shader);
-
 		// calculate ViewProjection matrix
 		glm::mat4 Projection = glm::perspective(90.0f, 4.0f / 3.0f, 0.1f, 100.f);
 
@@ -269,7 +308,7 @@ int main()
 		glm::mat4 View = glm::translate(glm::mat4(1.0f), glm::vec3(0.0f, 0.0f, -5.0f));
 
 		// make the camera rotate around the origin
-		View = glm::rotate(View, 5.0f* t, glm::vec3(1.0f, 1.0f, 1.0f));
+		View = glm::rotate(View, 2.0f * t, glm::vec3(1.0f, 1.0f, 1.0f));
 
 		glm::mat4 ViewProjection = Projection*View;
 

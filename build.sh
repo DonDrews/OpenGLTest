@@ -1,3 +1,2 @@
 #!/bin/bash
-
-g++ -o test.o selftest.cpp -lGL -lglfw -lGLEW -g
+g++ -o main.o pngloader.cpp selftest.cpp -lGL -lglfw -lGLEW
