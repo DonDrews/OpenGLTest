@@ -12,7 +12,7 @@ const float ambient = 0.2;
 
 void main()
 {
-	float diffuse = dot(-normalize(lightDir), fragNormal);
-	vec3 color = texture(tex, textureCoord).xyz;
-	FragColor = vec4(mix(color, vec3(1, 1, 1), (ambient + diffuse)), 1.0);
+	//float diffuse = dot(-normalize(lightDir), fragNormal);
+	FragColor = texture(tex, textureCoord);
+	//vec4(mix(color, vec3(1, 0, 0), (ambient + diffuse)), 1.0);
 }

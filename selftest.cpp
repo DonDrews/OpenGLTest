@@ -53,6 +53,16 @@ bool check_program_link_status(GLuint obj) {
 	return true;
 }
 
+void checkError(string text)
+{
+	//check for error in setup
+	GLenum error = glGetError();
+	if(error != GL_NO_ERROR)
+	{
+		cerr << text << error << endl;
+	}
+}
+
 void glfwWindowLoader(GLFWwindow* &window)
 {
 	if(glfwInit() == GL_FALSE) {
@@ -236,21 +246,29 @@ void textureLoader()
 {
 	//setup handle
 	GLuint chess;
-	glGenTextures(1, &chess);
 	glActiveTexture(GL_TEXTURE0);
+	glGenTextures(1, &chess);
 	glBindTexture(GL_TEXTURE_2D, chess);
+
+	checkError("Texture Bind GL Error: ");
 
 	//set parameters
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
+	checkError("Texture Filter GL Error: ");
+
 	//get data
-	unsigned char* imageData = makeCheckerboard(8);
+	GLubyte* imageData = makeCheckerboard(8);
+
+	checkError("Loader GL Error: ");
 
 	//apply to texture
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA8, 8, 8, 0, GL_RGBA, GL_UNSIGNED_BYTE, imageData);
+
+	checkError("Texture Application GL Error: ");
 }
 
 int main()
@@ -262,13 +280,6 @@ int main()
 	glewExperimental = GL_TRUE;
 	glewInit();
 
-	//check for error in setup
-	GLenum error = glGetError();
-	if(error != GL_NO_ERROR)
-	{
-		cerr << "GLError Start: " << error << endl;
-	}
-
 	//load shaders
 	GLuint shader, vertex, fragment;
 	loadShadersFromFile(shader, vertex, fragment);
@@ -277,9 +288,13 @@ int main()
 	GLint texLocation = glGetUniformLocation(shader, "tex");
 	glUseProgram(shader);
 
+	checkError("Shader GL Error (External): ");
+
 	//make buffers
 	GLuint vertexArray, vertexBuffer, indexBuffer;
 	makeCubeVBO(vertexArray, vertexBuffer, indexBuffer);
+
+	checkError("VBO GL Error: ");
 
 	//load textures
 	textureLoader();
@@ -290,6 +305,8 @@ int main()
 
 	//begin render loop
 	glEnable(GL_DEPTH_TEST);
+
+	checkError("Uniform GL Error: ");
 
 	while(!glfwWindowShouldClose(window))
 	{
@@ -321,16 +338,8 @@ int main()
 		// draw
 		glDrawElements(GL_TRIANGLES, 6*6, GL_UNSIGNED_INT, 0);
 
-		//check for error in drawing
-		error = glGetError();
-		if(error != GL_NO_ERROR)
-		{
-			cerr << "GLError: " << error << endl;
-			break;
-		}
+		checkError("Frame GL Error: ");
 
 		glfwSwapBuffers(window);
-
-		cout << "Frame" << endl;
 	}
 }

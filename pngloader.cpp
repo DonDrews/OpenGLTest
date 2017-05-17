@@ -1,10 +1,14 @@
+//GL LIBRARIES
+#include <GL/glew.h>
+#include <GLFW/glfw3.h>
+
 #include "pngloader.h"
 //returns an image of black and white pixels
 //formatted as an interlaced array of ubytes
 //RGBA
-unsigned char* makeCheckerboard(int size)
+GLubyte* makeCheckerboard(int size)
 {
-	unsigned char image[size * size * 4];
+	GLubyte* image = new GLubyte[size * size * 4];
 	for(int i = 0; i < size; i++)
 	{
 		for(int j = 0; j < size; j++)
@@ -16,4 +20,5 @@ unsigned char* makeCheckerboard(int size)
 			image[4 * (size * i + j) + 3] = 255; //alpha channel
 		}
 	}
+	return &image[0];
 }
